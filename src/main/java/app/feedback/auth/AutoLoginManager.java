@@ -21,10 +21,6 @@ public class AutoLoginManager {
 
     private final AutoLoginRepository autoLoginRepository;
 
-    public AutoLoginManager(AutoLoginRepository autoLoginRepository) {
-        this.autoLoginRepository = autoLoginRepository;
-    }
-
     public boolean isAuto(final HttpServletRequest request) {
         if (request == null) {
             return false;
