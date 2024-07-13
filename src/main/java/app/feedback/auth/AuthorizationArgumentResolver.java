@@ -1,7 +1,6 @@
 package app.feedback.auth;
 
 import app.feedback.auth.dto.Authentication;
-import app.feedback.member.domain.Member;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
@@ -23,7 +22,7 @@ public class AuthorizationArgumentResolver implements HandlerMethodArgumentResol
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         final boolean hasAnnotation = parameter.hasParameterAnnotation(Authorized.class);
-        final boolean isValidType = parameter.getParameterType() == Member.class;
+        final boolean isValidType = parameter.getParameterType() == Authentication.class;
 
         return hasAnnotation && isValidType;
     }
