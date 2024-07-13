@@ -1,5 +1,8 @@
 package app.feedback.common.exception;
 
+import lombok.Getter;
+
+@Getter
 public class CustomException extends RuntimeException {
     private final CustomErrorCode customErrorCode;
 

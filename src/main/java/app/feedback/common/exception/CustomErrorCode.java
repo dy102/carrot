@@ -1,7 +1,9 @@
 package app.feedback.common.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@Getter
 public enum CustomErrorCode {
     INCONSISTENCY(HttpStatus.BAD_REQUEST, "존재하지 않는 회원정보입니다."),
     DUPLICATED_EMAIL(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다."),
