@@ -1,7 +1,9 @@
 package app.feedback.member;
 
+import app.feedback.auth.AuthService;
 import app.feedback.auth.Authorized;
 import app.feedback.auth.dto.Authentication;
+import app.feedback.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequiredArgsConstructor
 public class MemberController {
     private final MemberService memberService;
+    private final AuthService authService;
     private static final String RESPONSE = "response";
 
     @PostMapping
@@ -32,7 +35,8 @@ public class MemberController {
     @GetMapping
     public String read(@Authorized final Authentication authentication,
                        final Model model) {
-        MembersResponse response = memberService.read(authentication);
+        authService.validateAdmin(authentication);
+        MembersResponse response = memberService.read();
         model.addAttribute(RESPONSE, response);
         return "form/members";
     }
@@ -41,16 +45,15 @@ public class MemberController {
     public String find(@Authorized final Authentication authentication,
                        @PathVariable final String memberId,
                        Model model) {
-        MemberResponse response = memberService.find(authentication, memberId);
+        authService.validateAdminOrMe(authentication, memberId);
+        MemberResponse response = memberService.find(memberId);
         model.addAttribute(RESPONSE, response);
         return "form/members/{memberId}";
     }
 
     @GetMapping("/simple/{memberId}")
-    public String findSimple(@Authorized final Authentication authentication,
-                             @PathVariable final String memberId,
-                             Model model) {
-        MemberSimpleResponse response = memberService.findSimple(authentication, memberId);
+    public String findSimple(@PathVariable final String memberId, Model model) {
+        MemberSimpleResponse response = memberService.findSimple(memberId);
         model.addAttribute(RESPONSE, response);
         return "form/members/simple";
     }
@@ -60,8 +63,9 @@ public class MemberController {
                          @PathVariable final String memberId,
                          @RequestBody final MemberUpdateRequest memberUpdateRequest,
                          final Model model) {
-        memberService.update(authentication, memberId, memberUpdateRequest);
-        MemberResponse response = memberService.find(authentication, memberId);
+        authService.validateAdminOrMe(authentication, memberId);
+        memberService.update(memberId, memberUpdateRequest);
+        MemberResponse response = memberService.find(memberId);
         model.addAttribute(RESPONSE, response);
         return "form/members/{memberId}";
     }
@@ -69,7 +73,8 @@ public class MemberController {
     @DeleteMapping("/{memberId}")
     public String delete(@Authorized final Authentication authentication,
                          @PathVariable final String memberId) {
-        memberService.delete(authentication, memberId);
+        authService.validateAdminOrMe(authentication, memberId);
+        memberService.delete(memberId);
         return "form/members";
     }
 

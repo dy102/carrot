@@ -1,8 +1,12 @@
-package app.feedback.member;
+package app.feedback.member.service;
 
-import app.feedback.auth.dto.Authentication;
 import app.feedback.common.exception.CustomErrorCode;
 import app.feedback.common.exception.CustomException;
+import app.feedback.member.MemberCreateRequest;
+import app.feedback.member.MemberResponse;
+import app.feedback.member.MemberSimpleResponse;
+import app.feedback.member.MemberUpdateRequest;
+import app.feedback.member.MembersResponse;
 import app.feedback.member.domain.Member;
 import app.feedback.member.domain.MemberRepository;
 import app.feedback.member.domain.PasswordEncoder;
@@ -20,7 +24,6 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationValidator authenticationValidator;
 
     @Override
     public void create(final MemberCreateRequest memberCreateRequest) {
@@ -36,8 +39,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MembersResponse read(final Authentication authentication) {
-        authenticationValidator.validateAdmin(authentication);
+    public MembersResponse read() {
         List<Member> members = memberRepository.findAll();
         List<MemberResponse> memberResponses = new ArrayList<>();
         for (Member member : members) {
@@ -50,8 +52,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberSimpleResponse findSimple(final Authentication authentication,
-                                           final String memberId) {
+    public MemberSimpleResponse findSimple(final String memberId) {
         Optional<Member> memberOptional = memberRepository.findByEmail(memberId);
         if (memberOptional.isPresent()) {
             Member member = memberOptional.get();
@@ -65,7 +66,6 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public void update(
-            final Authentication authentication,
             final String memberId,
             final MemberUpdateRequest memberUpdateRequest
     ) {
@@ -84,9 +84,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public void delete(final Authentication authentication,
-                       final String memberId) {
-        authenticationValidator.validateAdminOrMe(authentication, memberId);
+    public void delete(final String memberId) {
         Optional<Member> memberOptional = memberRepository.findByEmail(memberId);
         if (memberOptional.isPresent()) {
             Member member = memberOptional.get();
@@ -98,9 +96,7 @@ public class MemberServiceImpl implements MemberService {
 
 
     @Override
-    public MemberResponse find(final Authentication authentication,
-                               final String memberId) {
-        authenticationValidator.validateAdmin(authentication);
+    public MemberResponse find(final String memberId) {
         Optional<Member> memberOptional = memberRepository.findByEmail(memberId);
         if (memberOptional.isPresent()) {
             Member member = memberOptional.get();

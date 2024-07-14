@@ -6,6 +6,8 @@ import app.feedback.member.domain.Role;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 
+import static app.feedback.member.domain.Role.ADMIN;
+
 public record Authentication(
         String email,
         @Enumerated(value = EnumType.STRING) Role role
@@ -14,9 +16,11 @@ public record Authentication(
         return new Authentication(member.getEmail(), member.getRole());
     }
 
-    public void validateAdmin() {
-        if (role != Role.ADMIN) {
-            throw new IllegalArgumentException("관리자 권한이 필요합니다.");
-        }
+    public boolean isAdmin() {
+        return this.role.equals(ADMIN);
+    }
+
+    public boolean isMe(final String userId) {
+        return this.email.equals(userId);
     }
 }
