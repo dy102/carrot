@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Information</title>
+    <title>Create Post</title>
     <style>
         body, html {
             margin: 0;
@@ -17,53 +17,51 @@
         }
 
         .container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            height: 100%;
-        }
-
-        .user-info {
             background-color: #ffffff;
             padding: 20px;
-            margin: 10px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 300px;
-            width: calc(50% - 40px);
+            width: 100%;
+            max-width: 600px;
             border: 2px solid #ffa500; /* 당근 색상 */
         }
 
-        .user-info h1 {
+        h1 {
             color: #ffa500; /* 당근 색상 */
+            text-align: center;
         }
 
-        .button-group {
+        form {
             display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
+            flex-direction: column;
         }
 
-        .button {
+        label {
+            margin: 10px 0 5px;
+            color: #333;
+        }
+
+        input, textarea {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-family: 'Arial', sans-serif;
+            font-size: 16px;
+        }
+
+        button {
             background-color: #ffa500; /* 당근 색상 */
             color: white;
             border: none;
             padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 16px;
         }
 
-        .button:hover {
+        button:hover {
             background-color: #cc8400;
-        }
-
-        .carrot-icon {
-            width: 50px;
-            height: 50px;
-            margin-bottom: 20px;
         }
 
         header {
@@ -109,15 +107,19 @@
     </div>
 </header>
 <div class="container">
-    <div th:each="member : ${response.memberResponses()}" class="user-info">
-        <h1 th:text="${member.name()}">User Name</h1>
-        <p th:text="${member.email()}">user@example.com</p>
-        <p th:text="${member.introduction()}?: _">empty introduction</p>
-        <div class="button-group">
-            <button class="button">Edit</button>
-            <button class="button">Delete</button>
-        </div>
-    </div>
+    <h1>Create Post</h1>
+    <form th:action="@{/posts}" method="post" enctype="multipart/form-data">
+        <label for="title">Title</label>
+        <input type="text" id="title" name="title" required>
+
+        <label for="contents">Contents</label>
+        <textarea id="contents" name="contents" rows="10" required></textarea>
+
+        <label for="file"></label>
+        <input type="file" name="file">
+
+        <button type="submit">Submit</button>
+    </form>
 </div>
 </body>
 </html>

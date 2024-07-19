@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @RequestMapping("/members")
 @Controller
@@ -26,7 +27,8 @@ public class MemberController {
 
     @PostMapping
     public String create(
-            @ModelAttribute final MemberCreateRequest memberCreateRequest
+            @ModelAttribute final MemberCreateRequest memberCreateRequest,
+            final Model model
     ) {
         memberService.create(memberCreateRequest);
         return "form/login";
@@ -38,6 +40,7 @@ public class MemberController {
         authService.validateAdmin(authentication);
         MembersResponse response = memberService.read();
         model.addAttribute(RESPONSE, response);
+        model.addAttribute("auth", authentication);
         return "form/members";
     }
 
@@ -48,26 +51,28 @@ public class MemberController {
         authService.validateAdminOrMe(authentication, memberId);
         MemberResponse response = memberService.find(memberId);
         model.addAttribute(RESPONSE, response);
-        return "form/members/{memberId}";
+        model.addAttribute("auth", authentication);
+        return "form/member";
     }
 
     @GetMapping("/simple/{memberId}")
-    public String findSimple(@PathVariable final String memberId, Model model) {
+    public String findSimple(final @Authorized Authentication authentication,
+                             @PathVariable final String memberId, Model model) {
         MemberSimpleResponse response = memberService.findSimple(memberId);
         model.addAttribute(RESPONSE, response);
-        return "form/members/simple";
+        model.addAttribute("auth", authentication);
+        return "form/memberSimple";
     }
 
     @PutMapping("/{memberId}")
     public String update(@Authorized final Authentication authentication,
                          @PathVariable final String memberId,
                          @RequestBody final MemberUpdateRequest memberUpdateRequest,
-                         final Model model) {
+                         final RedirectAttributes redirectAttributes) {
         authService.validateAdminOrMe(authentication, memberId);
         memberService.update(memberId, memberUpdateRequest);
-        MemberResponse response = memberService.find(memberId);
-        model.addAttribute(RESPONSE, response);
-        return "form/members/{memberId}";
+        redirectAttributes.addAttribute("memberId", memberId);
+        return "redirect:/members/{memberId}";
     }
 
     @DeleteMapping("/{memberId}")
@@ -75,7 +80,7 @@ public class MemberController {
                          @PathVariable final String memberId) {
         authService.validateAdminOrMe(authentication, memberId);
         memberService.delete(memberId);
-        return "form/members";
+        return "redirect:/posts";
     }
 
     @GetMapping("/signup")

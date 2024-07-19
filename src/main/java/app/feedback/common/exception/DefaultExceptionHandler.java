@@ -13,7 +13,7 @@ public class DefaultExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler({CustomException.class})
     public ResponseEntity<CustomErrorResponse> handleDuplicateException(CustomException e, HttpServletRequest request) {
         log.info("errorCode : {}, url : {}, message : {}",
-                e.getCustomErrorCode().getHttpStatus(), request.getRequestURI(), e.getMessage());
+                e.getCustomErrorCode().getHttpStatus(), request.getRequestURI(), e.getMessage(), e);
         return new ResponseEntity<>(
                 new CustomErrorResponse(
                         e.getCustomErrorCode().getHttpStatus().value(),

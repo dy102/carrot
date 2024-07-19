@@ -75,6 +75,7 @@ public class MemberServiceImpl implements MemberService {
             member.update(
                     memberUpdateRequest.password(),
                     memberUpdateRequest.name(),
+                    memberUpdateRequest.introduction(),
                     passwordEncoder
             );
             memberRepository.save(member);

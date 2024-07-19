@@ -14,12 +14,16 @@ import lombok.Getter;
 public class Member {
     @Id
     private String email;
+
     @Column(nullable = false)
     private String password;
+
     @Column(nullable = true)
     private String introduction;
+
     @Column(nullable = false)
     private String name;
+    
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -41,9 +45,11 @@ public class Member {
     public void update(
             final String password,
             final String name,
+            final String introduction,
             final PasswordEncoder passwordEncoder
     ) {
         this.name = name;
+        this.introduction = introduction;
         this.password = passwordEncoder.encode(password);
     }
 

@@ -108,40 +108,10 @@
     </style>
 </head>
 <body>
-<header>
-    <div class="header-links">
-        <a th:href="@{/posts}" class="home-button">Home</a>
-    </div>
-</header>
-<div class="container">
-    <div class="login-form">
-        <img src="carrot.png" alt="Carrot Icon" class="carrot-icon">
-        <h1>Login</h1>
-        <form id="loginForm" th:action="@{/auth/login}" method="post">
-            <input type="email" name="email" placeholder="Email">
-            <input type="password" name="password" placeholder="Password">
-            <div>
-                <input type="checkbox" id="isAuto" name="isAuto">
-                <label for="isAuto">자동 로그인</label>
-            </div>
-            <button type="submit"
-                    th:onclick="|location.href='@{/posts}'|">Login
-            </button>
-        </form>
-    </div>
-</div>
-<script>
-    function handleFormSubmit(event) {
-        event.preventDefault();
-        const isAutoChecked = document.getElementById('isAuto').checked;
-        const form = document.getElementById('loginForm');
-
-        // 현재 체크박스를 제거하고, 값을 명시적으로 설정
-        document.getElementById('isAuto').value = isAutoChecked;
-
-        // 폼 전송
-        form.submit();
-    }
-</script>
+<form id="loginForm" th:action="@{/auth/logout}" method="post">
+    <button type="submit"
+            th:onclick="|location.href='@{/signup}'|">Login
+    </button>
+</form>
 </body>
 </html>

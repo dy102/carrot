@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Calendar</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding-top: 100px; /* 헤더와 선택 창 높이만큼 패딩 추가 */
+        }
+
+        header {
+            width: 100%;
+            background-color: #ffa500; /* 당근 색상 */
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .header-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .home-button, .mypage-button {
+            background-color: white;
+            color: #ffa500;
+            border: 2px solid #ffa500;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+        }
+
+        .home-button:hover, .mypage-button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .calendar-container {
+            width: 90%;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .calendar-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .calendar-header .day-name {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .calendar-header .weekend {
+            color: #ff9800;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .day {
+            width: 100%;
+            padding-top: 100%; /* 1:1 Aspect Ratio */
+            position: relative;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+            background-color: #f9f9f9;
+        }
+
+        .day-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .level-0 {
+            background-color: #f9f9f9;
+        }
+
+        .level-1 {
+            background-color: #ffe0b2;
+        }
+
+        .level-2 {
+            background-color: #ffcc80;
+        }
+
+        .level-3 {
+            background-color: #ffb74d;
+        }
+
+        .level-4 {
+            background-color: #ffa726;
+        }
+
+        .level-5 {
+            background-color: #ff9800;
+        }
+    </style>
+    <script>
+        function updateUrlWithYear() {
+            var selectedYear = document.getElementById("year").value;
+            var currentUrl = window.location.href;
+            var newUrl = new URL(currentUrl);
+            newUrl.searchParams.set('year', selectedYear);
+            window.location.href = newUrl.toString();
+        }
+
+        function updateUrlWithMonth() {
+            var selectedMonth = document.getElementById("month").value;
+            var currentUrl = window.location.href;
+            var newUrl = new URL(currentUrl);
+            newUrl.searchParams.set('month', selectedMonth);
+            window.location.href = newUrl.toString();
+        }
+    </script>
+</head>
+<body>
+<header>
+    <div class="header-links">
+        <a th:href="@{/posts}" class="home-button">Home</a>
+        <a th:href="@{|/members/${auth.email}|}" class="mypage-button"
+           th:if="${auth.email()!=null}">마이페이지</a>
+    </div>
+</header>
+<div class="calendar-container">
+    <div class="date-selector">
+        <div>
+            <h2 th:text="${response.year()} + ' - ' + ${response.month()}">2024 - 7</h2>
+        </div>
+        <label for="year">Year:</label>
+        <select id="year" name="year" onchange="updateUrlWithYear()">
+            <option th:each="y : ${years}" th:value="${y}" th:text="${y}"></option>
+        </select>
+
+        <label for="month">Month:</label>
+        <select id="month" name="month" onchange="updateUrlWithMonth()">
+            <option th:each="m : ${months}" th:value="${m}" th:text="${m}"></option>
+        </select>
+    </div>
+    <div class="calendar-header">
+        <span class="day-name weekend">Sun</span>
+        <span class="day-name">Mon</span>
+        <span class="day-name">Tue</span>
+        <span class="day-name">Wed</span>
+        <span class="day-name">Thu</span>
+        <span class="day-name">Fri</span>
+        <span class="day-name weekend">Sat</span>
+    </div>
+    <div class="calendar">
+        <!-- Empty cells for the start of the month -->
+        <div th:if="${response.startDay != null}">
+            <div th:each="i : ${#numbers.sequence(0, response.startDay - 1)}">
+                <div class="day level-0">
+                    <div class="day-content"></div>
+                </div>
+            </div>
+        </div>
+        <!-- Calendar cells with activity data -->
+        <div th:each="i : ${#numbers.sequence(0, response.totalDays - 1)}">
+            <div th:with="activity=${response.calendarDtos[i]}"
+                 th:class="'day level-' + ${activity == null ? 0 : activity.count}"
+                 th:title="${activity == null ? '' : activity.createdDate + ': ' + activity.count}"
+                 th:onclick="|location.href='@{|/posts/${memberId}/${response.calendarDtos[i].createdDate}|}'|">
+                <div class="day-content" th:text="${activity == null ? '' : activity.dayOfMonth}"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

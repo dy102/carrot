@@ -10,4 +10,6 @@ public interface AuthService {
 
     void validateAdminOrMe(final Authentication authentication,
                            final String userId);
+
+    void validateUser(Authentication authentication);
 }
