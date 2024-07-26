@@ -60,4 +60,8 @@ public class Post {
         this.contents = contents;
         this.image = image;
     }
+
+    public void setAiChat(AIChat aiChat) {
+        this.aiChat = aiChat;
+    }
 }

@@ -58,4 +58,5 @@ public class AuthServiceImpl implements AuthService {
             throw new CustomException(UNAUTHORIZED);
         }
     }
+
 }

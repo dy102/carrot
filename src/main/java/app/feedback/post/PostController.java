@@ -1,5 +1,6 @@
 package app.feedback.post;
 
+import app.feedback.ai.dto.AIResponse;
 import app.feedback.auth.AuthService;
 import app.feedback.auth.Authorized;
 import app.feedback.auth.dto.Authentication;
@@ -9,12 +10,15 @@ import app.feedback.post.dto.PostResponse;
 import app.feedback.post.dto.PostsResponse;
 import app.feedback.post.service.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -45,7 +49,7 @@ public class PostController {
     public String find(final @Authorized Authentication authentication,
                        final @PathVariable Long postId,
                        final Model model) {
-        PostResponse response = postService.find(postId);
+        PostResponse response = postService.find(authentication.email(), postId);
         model.addAttribute("response", response);
         model.addAttribute("auth", authentication);
         return "form/post";
@@ -80,6 +84,15 @@ public class PostController {
         return "form/postForm";
     }
 
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<String> delete(final @Authorized Authentication authentication,
+                                         final @PathVariable Long postId,
+                                         final Model model) {
+        postService.delete(authentication.email(), postId);
+        model.addAttribute("auth", authentication);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/calendar/{memberId}")
     public String getCalendar(final @Authorized Authentication authentication,
                               final @PathVariable String memberId,
@@ -96,5 +109,14 @@ public class PostController {
         model.addAttribute("years", years);
         model.addAttribute("months", months);
         return "form/calendar";
+    }
+
+    @PutMapping("/{postId}/aiChat")
+    public ResponseEntity<AIResponse> aiChat(final @Authorized Authentication authentication,
+                                             final @PathVariable Long postId,
+                                             final Model model) {
+        authService.validateUser(authentication);
+        AIResponse aiResponse = postService.getAIChat(postId);
+        return ResponseEntity.ok(aiResponse);
     }
 }

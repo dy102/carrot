@@ -1,5 +1,6 @@
 package app.feedback.post.service;
 
+import app.feedback.ai.dto.AIResponse;
 import app.feedback.common.exception.CustomException;
 import app.feedback.post.dto.PostCalendarResponse;
 import app.feedback.post.dto.PostCreateUpdateRequest;
@@ -12,7 +13,7 @@ import java.util.List;
 public interface PostService {
     Long create(String userId, PostCreateUpdateRequest request, MultipartFile image);
 
-    PostResponse find(Long postId) throws CustomException;
+    PostResponse find(String memberId, Long postId) throws CustomException;
 
     PostsResponse read();
 
@@ -23,4 +24,8 @@ public interface PostService {
     List<Integer> getYears();
 
     List<Integer> getMonths();
+
+    void delete(String email, Long postId);
+
+    AIResponse getAIChat(Long postId);
 }

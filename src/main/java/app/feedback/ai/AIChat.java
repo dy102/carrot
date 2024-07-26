@@ -18,4 +18,13 @@ public class AIChat {
 
     @Column(nullable = false)
     private String chat;
+
+    public AIChat(
+            String chat
+    ) {
+        this.chat = chat;
+    }
+
+    protected AIChat() {
+    }
 }

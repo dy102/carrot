@@ -1,9 +1,15 @@
 package app.feedback.post.service;
 
+import app.feedback.ai.AIChat;
+import app.feedback.ai.AIService;
+import app.feedback.ai.dto.AIResponse;
+import app.feedback.auth.AuthService;
 import app.feedback.common.exception.CustomErrorCode;
 import app.feedback.common.exception.CustomException;
+import app.feedback.common.exception.NotFoundException;
 import app.feedback.member.domain.Member;
 import app.feedback.member.domain.MemberRepository;
+import app.feedback.member.domain.Role;
 import app.feedback.post.domain.Post;
 import app.feedback.post.domain.PostRepository;
 import app.feedback.post.dto.CalendarDto;
@@ -29,6 +35,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
+import static app.feedback.common.exception.CustomErrorCode.FORBIDDEN;
 import static app.feedback.common.exception.CustomErrorCode.INCONSISTENCY;
 import static app.feedback.common.exception.CustomErrorCode.POST_NOT_FOUND;
 
@@ -39,6 +46,8 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
     private final ImageService imageService;
+    private final AIService aiService;
+    private final AuthService authService;
 
     @Override
     public Long create(String userId, PostCreateUpdateRequest request, MultipartFile image) {
@@ -60,13 +69,17 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponse find(Long postId) throws CustomException {
+    public PostResponse find(String memberId, Long postId) throws CustomException {
         Optional<Post> postOptional = postRepository.findById(postId);
         if (postOptional.isPresent()) {
             Post post = postOptional.get();
-            return PostResponse.of(post);
+            boolean isOwner = false;
+            if (memberId.equals(post.getWriter().getEmail())) {
+                isOwner = true;
+            }
+            return PostResponse.of(isOwner, post);
         } else {
-            throw new CustomException(POST_NOT_FOUND);
+            throw new NotFoundException();
         }
     }
 
@@ -187,5 +200,40 @@ public class PostServiceImpl implements PostService {
         return Arrays.stream(Month.values())
                 .map(Month::getValue)
                 .toList();
+    }
+
+    @Override
+    public void delete(String email, Long postId) {
+        Optional<Post> postOptional = postRepository.findById(postId);
+        Optional<Member> memberOptional = memberRepository.findByEmail(email);
+        if (postOptional.isPresent() && memberOptional.isPresent()) {
+            Post post = postOptional.get();
+            Member member = memberOptional.get();
+            if (email.equals(post.getWriter().getEmail()) || member.getRole().equals(Role.ADMIN)) {
+                postRepository.delete(post);
+            } else {
+                throw new CustomException(FORBIDDEN);
+            }
+        } else {
+            throw new CustomException(POST_NOT_FOUND);
+        }
+    }
+
+    @Override
+    public AIResponse getAIChat(Long postId) {
+        Optional<Post> postOptional = postRepository.findById(postId);
+        if (postOptional.isPresent()) {
+            Post post = postOptional.get();
+            if (post.getAiChat() == null) {
+                AIChat aiChat = aiService.getAIResponse(post.getTitle() + post.getContents());
+                post.setAiChat(aiChat);
+                postRepository.save(post);
+                return AIResponse.of(aiChat);
+            } else {
+                return AIResponse.of(post.getAiChat());
+            }
+        } else {
+            throw new CustomException(POST_NOT_FOUND);
+        }
     }
 }
