@@ -27,6 +27,7 @@ public class AuthServiceImpl implements AuthService {
         final Member member = memberRepository.findByEmail(loginRequest.email())
                 .orElseThrow(() -> new CustomException(INCONSISTENCY));
         member.checkPassword(loginRequest.password(), passwordEncoder);
+
         return Authentication.from(member);
     }
 

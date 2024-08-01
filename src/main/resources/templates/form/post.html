@@ -13,6 +13,10 @@
             background-color: #f9f9f9;
         }
 
+        h1 {
+            flex-grow: 1;
+        }
+
         .container {
             width: 100%;
             max-width: 600px;
@@ -131,6 +135,17 @@
             text-decoration: none;
         }
 
+        .update-button {
+            background-color: #ffa500;
+            color: white;
+            border: 2px solid white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+        }
+
         .home-button:hover, .mypage-button:hover {
             background-color: #f0f0f0;
         }
@@ -138,11 +153,12 @@
         .delete-button {
             background-color: #ff4d4d;
             color: white;
-            border: none;
+            border: 2px solid white;
             padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
+            float: right;
         }
 
         .delete-button:hover {
@@ -200,6 +216,16 @@
             var postId = [[${response.postId}]];
             makeAIChat(postId);
         });
+
+        function redirectBasedOnCondition(writerId, writerName, isOwner) {
+            let url = '';
+            if (isOwner) {
+                url = `/members/${writerId}`;
+            } else {
+                url = `/members/simple/${writerName}`;
+            }
+            window.location.href = url;
+        }
     </script>
 
 </head>
@@ -213,8 +239,18 @@
 </header>
 <div class="container">
     <div class="post-info">
-        <div class="post-header" th:onclick="|location.href='@{|/members/${response.writerId}|}'|">
-            <h1 th:text="${response.writerName}">Author Name</h1>
+        <div class="post-header">
+            <h1 th:text="${response.writerName}"
+                th:onclick="redirectBasedOnCondition([[${response.writerId()}]],[[${response.writerName()}]], [[${response.isOwner()}]])">
+                Author
+                Name</h1>
+            <button th:onclick="|location.href='@{|/posts/${response.postId}/updateForm|}'|"
+                    class="update-button"
+                    th:if="${response.isOwner()}">수정
+            </button>
+            <button class="delete-button" th:if="${response.isOwner()}"
+                    th:onclick="deletePost([[${response.postId}]])">삭제
+            </button>
         </div>
         <div class="post-body">
             <h2 th:text="${response.title}">Post Title</h2>
@@ -233,8 +269,6 @@
                     </p>
                 </div>
             </div>
-            <button class="delete-button" th:if="${response.isOwner}" th:onclick="deletePost([[${response.postId}]])">삭제
-            </button>
         </div>
     </div>
 </div>

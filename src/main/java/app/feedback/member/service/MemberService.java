@@ -13,7 +13,7 @@ public interface MemberService {
 
     MemberResponse find(final String memberId);
 
-    MemberSimpleResponse findSimple(final String memberId);
+    MemberSimpleResponse findSimple(final String name);
 
     void update(final String memberId,
                 final MemberUpdateRequest memberUpdateRequest);

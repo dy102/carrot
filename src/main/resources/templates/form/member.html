@@ -115,7 +115,7 @@
         <h1 th:text="${response.name}">User Name</h1>
         <p th:text="${response.email}">user@example.com</p>
         <p th:text="${response.introduction} ?: 'No introduction provided.'">This is the user's introduction.</p>
-        <div class="calendar" th:onclick="|location.href='@{|/posts/calendar/${response.email}|}'|">
+        <div class="calendar" th:onclick="|location.href='@{|/posts/calendar/${response.name}|}'|">
             <p>calendar</p>
         </div>
     </div>

@@ -48,6 +48,8 @@ public class Post {
     @CreatedDate
     private LocalDate createdDate;
 
+    private Boolean isUpdated = false;
+
     protected Post() {
     }
 
@@ -59,6 +61,17 @@ public class Post {
         this.title = title;
         this.contents = contents;
         this.image = image;
+    }
+
+    public void update(
+            final String title,
+            final String contents,
+            final String image
+    ) {
+        this.title = title;
+        this.contents = contents;
+        this.image = image;
+        this.isUpdated = true;
     }
 
     public void setAiChat(AIChat aiChat) {

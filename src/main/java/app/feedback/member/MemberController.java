@@ -55,10 +55,10 @@ public class MemberController {
         return "form/member";
     }
 
-    @GetMapping("/simple/{memberId}")
+    @GetMapping("/simple/{name}")
     public String findSimple(final @Authorized Authentication authentication,
-                             @PathVariable final String memberId, Model model) {
-        MemberSimpleResponse response = memberService.findSimple(memberId);
+                             @PathVariable final String name, Model model) {
+        MemberSimpleResponse response = memberService.findSimple(name);
         model.addAttribute(RESPONSE, response);
         model.addAttribute("auth", authentication);
         return "form/memberSimple";

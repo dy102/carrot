@@ -37,7 +37,7 @@ public class PostController {
     @PostMapping
     public String create(final @Authorized Authentication authentication,
                          final @ModelAttribute PostCreateUpdateRequest request,
-                         @RequestPart(name = "file") MultipartFile multipartFile,
+                         final @RequestPart(name = "file") MultipartFile multipartFile,
                          final RedirectAttributes redirectAttributes) {
         authService.validateUser(authentication);
         Long postId = postService.create(authentication.email(), request, multipartFile);
@@ -64,13 +64,13 @@ public class PostController {
         return "form/posts";
     }
 
-    @GetMapping("/{memberId}/{date}")
+    @GetMapping("/{name}/{date}")
     public String readMyPost(final @Authorized Authentication authentication,
-                             final @PathVariable String memberId,
+                             final @PathVariable String name,
                              final @PathVariable String date,
                              final Model model) {
         authService.validateUser(authentication);
-        PostsResponse response = postService.readMyPost(memberId, date);
+        PostsResponse response = postService.readMyPost(name, date);
         model.addAttribute("response", response);
         model.addAttribute("auth", authentication);
         return "form/posts";
@@ -93,19 +93,19 @@ public class PostController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/calendar/{memberId}")
+    @GetMapping("/calendar/{name}")
     public String getCalendar(final @Authorized Authentication authentication,
-                              final @PathVariable String memberId,
+                              final @PathVariable String name,
                               final @RequestParam(required = false) Integer year,
                               final @RequestParam(required = false) Integer month,
                               final Model model) {
         authService.validateUser(authentication);
-        PostCalendarResponse calendar = postService.getCalendar(memberId, year, month);
+        PostCalendarResponse calendar = postService.getCalendar(name, year, month);
         List<Integer> years = postService.getYears();
         List<Integer> months = postService.getMonths();
         model.addAttribute("response", calendar);
         model.addAttribute("auth", authentication);
-        model.addAttribute("memberId", memberId);
+        model.addAttribute("memberName", name);
         model.addAttribute("years", years);
         model.addAttribute("months", months);
         return "form/calendar";
@@ -118,5 +118,25 @@ public class PostController {
         authService.validateUser(authentication);
         AIResponse aiResponse = postService.getAIChat(postId);
         return ResponseEntity.ok(aiResponse);
+    }
+
+    @PutMapping("/{postId}")
+    public ResponseEntity<Void> update(final @Authorized Authentication authentication,
+                                       final @PathVariable Long postId,
+                                       final @ModelAttribute PostCreateUpdateRequest updateRequest,
+                                       final @RequestPart(name = "file") MultipartFile multipartFile) {
+        postService.update(authentication.email(), postId, updateRequest, multipartFile);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{postId}/updateForm")
+    public String update(final @Authorized Authentication authentication,
+                         final @PathVariable Long postId,
+                         final Model model) {
+        PostResponse response = postService.find(authentication.email(), postId);
+        model.addAttribute("postId", postId);
+        model.addAttribute("response", response);
+        model.addAttribute("auth", authentication);
+        return "form/postUpdateForm";
     }
 }

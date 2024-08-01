@@ -13,6 +13,7 @@ import app.feedback.member.domain.PasswordEncoder;
 import app.feedback.member.domain.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,7 @@ public class MemberServiceImpl implements MemberService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional
     public void create(final MemberCreateRequest memberCreateRequest) {
         validateDuplicated(memberCreateRequest);
         Member member = new Member(
@@ -52,8 +54,8 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberSimpleResponse findSimple(final String memberId) {
-        Optional<Member> memberOptional = memberRepository.findByEmail(memberId);
+    public MemberSimpleResponse findSimple(final String name) {
+        Optional<Member> memberOptional = memberRepository.findByName(name);
         if (memberOptional.isPresent()) {
             Member member = memberOptional.get();
             return new MemberSimpleResponse(

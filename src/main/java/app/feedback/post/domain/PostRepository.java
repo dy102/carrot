@@ -15,7 +15,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<PostCountProjection> countPostsGroupByDate(String email);
 
     @Query("select p from Post p " +
-            "where p.writer.email=:email and p.createdDate=:date " +
+            "where p.writer.name=:name and p.createdDate=:date " +
             "order by p.createdTime desc")
-    List<Post> findAllByEmailAndDate(String email, LocalDate date);
+    List<Post> findAllByEmailAndDate(String name, LocalDate date);
 }

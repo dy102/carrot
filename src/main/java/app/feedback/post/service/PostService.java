@@ -17,9 +17,9 @@ public interface PostService {
 
     PostsResponse read();
 
-    PostCalendarResponse getCalendar(String memberId, Integer year, Integer month);
+    PostCalendarResponse getCalendar(String name, Integer year, Integer month);
 
-    PostsResponse readMyPost(String email, String date);
+    PostsResponse readMyPost(String name, String date);
 
     List<Integer> getYears();
 
@@ -28,4 +28,7 @@ public interface PostService {
     void delete(String email, Long postId);
 
     AIResponse getAIChat(Long postId);
+
+    void update(String email, Long postId,
+                PostCreateUpdateRequest updateRequest, MultipartFile multipartFile);
 }

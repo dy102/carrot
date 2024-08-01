@@ -23,7 +23,7 @@ public class AuthController {
 
 
     @PostMapping("/login")
-    public String login(@ModelAttribute final LoginRequest request,
+    public String login(final @ModelAttribute LoginRequest request,
                         final HttpServletResponse httpServletResponse,
                         final HttpSession session) {
         final Authentication authentication = authService.login(request);
@@ -45,8 +45,13 @@ public class AuthController {
         return "redirect:/members/signup";
     }
 
-    @GetMapping("/logoutForm")
+    @GetMapping("/loginForm")
     public String logoutForm() {
-        return "form/logout";
+        return "form/login";
+    }
+
+    @GetMapping("/signupForm")
+    public String signForm() {
+        return "form/signup";
     }
 }

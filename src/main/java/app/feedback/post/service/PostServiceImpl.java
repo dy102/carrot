@@ -3,13 +3,13 @@ package app.feedback.post.service;
 import app.feedback.ai.AIChat;
 import app.feedback.ai.AIService;
 import app.feedback.ai.dto.AIResponse;
-import app.feedback.auth.AuthService;
 import app.feedback.common.exception.CustomErrorCode;
 import app.feedback.common.exception.CustomException;
 import app.feedback.common.exception.NotFoundException;
 import app.feedback.member.domain.Member;
 import app.feedback.member.domain.MemberRepository;
 import app.feedback.member.domain.Role;
+import app.feedback.post.PostWriterValidator;
 import app.feedback.post.domain.Post;
 import app.feedback.post.domain.PostRepository;
 import app.feedback.post.dto.CalendarDto;
@@ -47,7 +47,7 @@ public class PostServiceImpl implements PostService {
     private final MemberRepository memberRepository;
     private final ImageService imageService;
     private final AIService aiService;
-    private final AuthService authService;
+    private final PostWriterValidator postWriterValidator;
 
     @Override
     public Long create(String userId, PostCreateUpdateRequest request, MultipartFile image) {
@@ -98,17 +98,19 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostsResponse readMyPost(String email, String date) {
+    public PostsResponse readMyPost(String name, String date) {
         LocalDate localDate = LocalDate.parse(date);
-        List<Post> posts = postRepository.findAllByEmailAndDate(email, localDate);
+        List<Post> posts = postRepository.findAllByEmailAndDate(name, localDate);
         return getPostsResponse(posts);
     }
 
     @Override
-    public PostCalendarResponse getCalendar(String memberId, Integer year, Integer month) {
-        Optional<Member> memberOptional = memberRepository.findByEmail(memberId);
+    public PostCalendarResponse getCalendar(String name, Integer year, Integer month) {
+        Optional<Member> memberOptional = memberRepository.findByName(name);
         if (memberOptional.isPresent()) {
-            List<PostCountProjection> countedPostsGroupByDate = postRepository.countPostsGroupByDate(memberId);
+            Member member = memberOptional.get();
+            List<PostCountProjection> countedPostsGroupByDate
+                    = postRepository.countPostsGroupByDate(member.getEmail());
 
             List<CalendarDto> calendarDtos = countedPostsGroupByDate.stream()
                     .map(CalendarDto::of)
@@ -232,6 +234,28 @@ public class PostServiceImpl implements PostService {
             } else {
                 return AIResponse.of(post.getAiChat());
             }
+        } else {
+            throw new CustomException(POST_NOT_FOUND);
+        }
+    }
+
+    @Override
+    public void update(String email, Long postId,
+                       PostCreateUpdateRequest updateRequest, MultipartFile multipartFile) {
+        postWriterValidator.validateAdminOrMe(email, postId);
+        Optional<Post> postOptional = postRepository.findById(postId);
+        if (postOptional.isPresent()) {
+            Post post = postOptional.get();
+            if (post.getAiChat() == null) {
+                throw new CustomException(CustomErrorCode.AI_NULL);
+            }
+            post.update(
+                    updateRequest.title(),
+                    updateRequest.contents(),
+                    imageService.saveImage(multipartFile)
+            );
+            post.setAiChat(null);
+            postRepository.save(post);
         } else {
             throw new CustomException(POST_NOT_FOUND);
         }

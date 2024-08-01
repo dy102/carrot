@@ -194,7 +194,7 @@
             <div th:with="activity=${response.calendarDtos[i]}"
                  th:class="'day level-' + ${activity == null ? 0 : activity.count}"
                  th:title="${activity == null ? '' : activity.createdDate + ': ' + activity.count}"
-                 th:onclick="|location.href='@{|/posts/${memberId}/${response.calendarDtos[i].createdDate}|}'|">
+                 th:onclick="|location.href='@{|/posts/${memberName}/${response.calendarDtos[i].createdDate}|}'|">
                 <div class="day-content" th:text="${activity == null ? '' : activity.dayOfMonth}"></div>
             </div>
         </div>
